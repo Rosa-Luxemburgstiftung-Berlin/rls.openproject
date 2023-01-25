@@ -19,7 +19,7 @@
     name: openproject
 
 - name: set openproject package on hold
-  dpkg_selections:
+  ansible.builtin.dpkg_selections:
     name: openproject
     selection: hold
   when: openproject_hold_package | bool
