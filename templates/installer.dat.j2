@@ -1,0 +1,22 @@
+openproject/edition default
+postgres/autoinstall {{ openproject_postgres.autoinstall }}
+
+server/autoinstall {{ openproject_server.autoinstall }}
+server/variant {{ openproject_server. variant}}
+server/hostname {{ openproject_server.hostname }}
+server/server_path_prefix {{ openproject_server.server_path_prefix }}
+server/ssl {{ openproject_server.ssl }}
+{% if openproject_server.ssl == 'yes' or openproject_server.ssl | bool %}
+server/ssl_cert /etc/ssl/certs/{{ openproject_filename_cert }}
+server/ssl_key /etc/ssl/certs/{{ openproject_filename_key }}
+server/ssl_ca {% if openproject_filename_ca | length > 0 %}/etc/ssl/certs/{{ openproject_filename_ca }}{% endif %}
+{% endif %}
+
+repositories/api-key {{ openproject_repositories.api-key }}
+repositories/svn-install {{ openproject_repositories.svn-install }}
+repositories/git-install {{ openproject_repositories.git-install }}
+
+memcached/autoinstall {{ openproject_memcached.autoinstall }}
+
+openproject/admin_email {{ openproject_admin_account }}
+

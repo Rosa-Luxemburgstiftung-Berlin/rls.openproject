@@ -6,4 +6,36 @@ openproject_required_packages:
 
 openproject_hold_package: false
 
+openproject_server:
+  hostname: "{{ inventory_hostname }}"
+  autoinstall: install
+  variant: apache2
+  server_path_prefix:
+  ssl: 'yes'  # use quotes in order to prevent cast to bool
+
+# defining yor own DB is not implemented yet
+openproject_postgres:
+  autoinstall: install
+
+openproject_repositories:
+  api-key: PlSDefineAndVaultMe!
+  svn-install: skip
+  git-install: skip
+
+openproject_memcached:
+  autoinstall: install
+
+# set openproject_server.ssl to 'no' in order to skip the
+# installation of certificates and disable ssl support!
+openproject_filename_cert: "{{ inventory_hostname }}.pem"
+openproject_filename_key: "{{ inventory_hostname }}.key"
+openproject_filename_ca:
+
+openproject_admin_account: admin@example.net
+
+openproject_configset: []
+# example: # FIXME: this is NOT idempotent
+# openproject_configset:
+#   - 'OPENPROJECT_LOG__LEVEL="debug"'
+
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml

@@ -1,0 +1,10 @@
+---
+
+- name: openproject configure
+  ansible.builtin.command: openproject configure
+  notify: openproject restart
+
+- name: openproject restart
+  ansible.builtin.service:
+    name: openproject
+    state: restarted
