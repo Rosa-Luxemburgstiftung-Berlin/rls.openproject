@@ -28,7 +28,7 @@
   ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/etc/ssl/certs/{{ item }}"
-    mode: 0640
+    mode: "0640"
     group: root
     owner: root
   with_items:
@@ -44,7 +44,7 @@
     src: installer.dat.j2
     dest: /etc/openproject/installer.dat
     backup: true
-    mode: 0640
+    mode: "0640"
     owner: openproject
     group: openproject
   notify: openproject configure
