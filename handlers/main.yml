@@ -1,6 +1,6 @@
 ---
 
-- name: openproject configure
+- name: openproject configure  # noqa no-changed-when
   ansible.builtin.command: openproject configure
   notify: openproject restart
 
