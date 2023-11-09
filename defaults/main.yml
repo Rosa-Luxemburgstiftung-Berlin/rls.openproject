@@ -13,7 +13,7 @@ openproject_server:
   server_path_prefix:
   ssl: 'yes'  # use quotes in order to prevent cast to bool
 
-# defining yor own DB is not implemented yet
+# defining your own DB is not implemented yet
 openproject_postgres:
   autoinstall: install
 
