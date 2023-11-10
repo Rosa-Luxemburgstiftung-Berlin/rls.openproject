@@ -2,4 +2,4 @@
 [![ansible-lint](https://github.com/Rosa-Luxemburgstiftung-Berlin/rls.openproject/actions/workflows/lint.yml/badge.svg)](https://github.com/Rosa-Luxemburgstiftung-Berlin/rls.openproject/actions/workflows/lint.yml)
 
 # rls.openproject
-ansible playbook to install openproject on debian systems
+ansible playbook to install [openproject](https://www.openproject.org/) on debian and ubuntu systems.
