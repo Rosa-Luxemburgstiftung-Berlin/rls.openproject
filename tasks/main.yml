@@ -40,6 +40,7 @@
     mode: "0640"
     group: root
     owner: root
+  diff: "{{ openproject_show_diff | default(false) | bool }}"
   with_items:
     - "{{ openproject_filename_cert }}"
     - "{{ openproject_filename_key }}"
@@ -57,6 +58,7 @@
     mode: "0640"
     owner: openproject
     group: openproject
+  diff: "{{ openproject_show_diff | default(false) | bool }}"
   notify: openproject configure
 
 - name: "openproject config:set"  # noqa no-changed-when
