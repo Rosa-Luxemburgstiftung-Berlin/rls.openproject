@@ -1,0 +1,66 @@
+# vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu
+---
+name: molecule test
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: "5 6 * * 1"
+jobs:
+  molecule:
+    name: molecule
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # max-parallel: 3
+      matrix:
+        ansible:
+          - latest ansible
+          - pinned ansible
+          - legacy ansible
+        distro:
+          - debian12
+          - debian11
+          - ubuntu2204
+          - ubuntu2004
+        include:
+          - ansible: latest ansible
+            pip3deps: 'ansible molecule "molecule-plugins[docker]" yamllint ansible-lint "requests<2.29" "urllib3<2"'
+          - ansible: pinned ansible
+            pip3deps: '"ansible==8.6.0" "molecule[docker,lint]==3.5.2" "yamllint==1.26.0" "ansible-lint==6.22.0" "requests<2.29" "urllib3<2"'
+          - ansible: legacy ansible
+            pip3deps: '"ansible==2.9.27" "molecule[docker,lint]==3.2.3" "yamllint==1.24.2" "ansible-lint==4.2.0" "requests<2.29" "urllib3<2"'
+          - distro: debian12
+            did: debian
+            codename: bookworm
+          - distro: debian11
+            did: debian
+            codename: bullseye
+          - distro: ubuntu2204
+            did: ubuntu
+            codename: jammy
+          - distro: ubuntu2004
+            did: ubuntu
+            codename: focal
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: 'rls.openproject'
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install test dependencies.
+        run: pip3 install ${{ matrix.pip3deps }}
+
+      - name: run molecule tests
+        run: molecule test
+        working-directory: rls.openproject
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          molecule_skip_rebuild_all: true
+          MOLECULE_DISTRO: ${{ matrix.did }}
+          MOLECULE_DISTROCODENAME: ${{ matrix.codename }}

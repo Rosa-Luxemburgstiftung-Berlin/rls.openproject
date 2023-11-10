@@ -1,0 +1,30 @@
+---
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: ${MOLECULE_DISTRO:-debian}:${MOLECULE_DISTROCODENAME:-bookworm}
+    dockerfile: Dockerfile-${MOLECULE_DISTRO:-debian}-${MOLECULE_DISTROCODENAME:-bookworm}.j2
+    privileged: true
+    override_command: false
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
+    capabilities:
+      - SYS_ADMIN
+    security_opts:
+      - seccomp=unconfined
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      hash_behaviour: merge
+  inventory:
+    group_vars:
+      all:
+        openproject_server:
+          ssl: 'no'
+verifier:
+  name: ansible
