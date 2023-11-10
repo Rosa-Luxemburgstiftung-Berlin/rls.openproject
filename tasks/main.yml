@@ -9,6 +9,7 @@
   ansible.builtin.get_url:
     url: https://dl.packager.io/srv/opf/openproject/key
     dest: /etc/apt/trusted.gpg.d/packager-io.asc
+    mode: "0644"
 
 - name: openproject apt repo for debian
   ansible.builtin.apt_repository:
