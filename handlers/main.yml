@@ -2,6 +2,10 @@
 
 - name: openproject configure  # noqa no-changed-when
   ansible.builtin.command: openproject configure
+  register: _openproject_configure
+  failed_when: >
+    ( "molecule-notest" not in ansible_skip_tags and _openproject_configure.rc > 0 )
+    or ( "molecule-notest" in ansible_skip_tags and _openproject_configure.rc > 1 )
   notify: openproject restart
 
 - name: openproject restart
