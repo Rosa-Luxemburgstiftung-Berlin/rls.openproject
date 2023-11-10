@@ -3,6 +3,7 @@
 - name: install required packages
   ansible.builtin.apt:
     name: "{{ openproject_required_packages }}"
+    update_cache: true
 
 - name: openproject apt key
   ansible.builtin.apt_key:

@@ -3,6 +3,7 @@
 openproject_required_packages:
   - apt-transport-https
   - ca-certificates
+  - gpg
 
 openproject_hold_package: false
 
