@@ -10,7 +10,7 @@ server/ssl {{ openproject_server.ssl }}
 {% if openproject_server.ssl == 'yes' or openproject_server.ssl | bool %}
 server/ssl_cert /etc/ssl/certs/{{ openproject_filename_cert }}
 server/ssl_key /etc/ssl/certs/{{ openproject_filename_key }}
-server/ssl_ca {% if openproject_filename_ca | length > 0 %}/etc/ssl/certs/{{ openproject_filename_ca }}{% endif %}
+server/ssl_ca {% if openproject_filename_ca and openproject_filename_ca | length > 0 %}/etc/ssl/certs/{{ openproject_filename_ca }}{% endif %}
 {% endif %}
 
 repositories/api-key {{ openproject_repositories.api_key }}
