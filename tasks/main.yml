@@ -47,8 +47,7 @@
     - "{{ openproject_filename_key }}"
     - "{{ openproject_filename_ca }}"
   when:
-    - item is defined
-    - item
+    - item | type_debug != 'NoneType'
     - item | length > 0
     - openproject_server.ssl == 'yes'
 
