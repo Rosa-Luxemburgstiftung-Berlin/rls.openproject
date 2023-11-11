@@ -54,7 +54,7 @@
 - name: deploy installer.dat
   ansible.builtin.template:
     src: installer.dat.j2
-    dest: /etc/openproject/installer.dat
+    dest: /etc/openproject/installer.dat-preconfig
     backup: true
     mode: "0640"
     owner: openproject
