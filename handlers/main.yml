@@ -1,7 +1,9 @@
 ---
 
-- name: openproject configure  # noqa no-changed-when
-  ansible.builtin.command: openproject configure
+- name: openproject configure
+  ansible.builtin.command:
+    cmd: openproject configure -f /etc/openproject/installer.dat-preconfig
+    creates: /etc/openproject/installer.dat
   notify: openproject restart
 
 - name: openproject restart

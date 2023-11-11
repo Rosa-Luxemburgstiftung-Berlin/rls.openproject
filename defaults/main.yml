@@ -3,14 +3,19 @@
 openproject_required_packages:
   - apt-transport-https
   - ca-certificates
+  - gpg
+  - wget
 
 openproject_hold_package: false
+
+openproject_main_version: 13
 
 openproject_server:
   hostname: "{{ inventory_hostname }}"
   autoinstall: install
   variant: apache2
   server_path_prefix:
+  default_language: en
   ssl: 'yes'  # use quotes in order to prevent cast to bool
 
 # defining your own DB is not implemented yet
@@ -18,9 +23,9 @@ openproject_postgres:
   autoinstall: install
 
 openproject_repositories:
-  api-key: PlSDefineAndVaultMe!
-  svn-install: skip
-  git-install: skip
+  api_key: PlSDefineAndVaultMe!
+  svn_install: skip
+  git_install: skip
 
 openproject_memcached:
   autoinstall: install

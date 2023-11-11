@@ -3,20 +3,30 @@
 - name: install required packages
   ansible.builtin.apt:
     name: "{{ openproject_required_packages }}"
+    update_cache: true
 
 - name: openproject apt key
-  ansible.builtin.apt_key:
+  ansible.builtin.get_url:
     url: https://dl.packager.io/srv/opf/openproject/key
-    state: present
+    dest: /etc/apt/trusted.gpg.d/packager-io.asc
+    mode: "0644"
 
-- name: openproject apt repo
+- name: openproject apt repo for debian
   ansible.builtin.apt_repository:
-    repo: deb https://dl.packager.io/srv/deb/opf/openproject/stable/12/debian {{ ansible_distribution_major_version | default('11') }} main
+    repo: deb https://dl.packager.io/srv/deb/opf/openproject/stable/{{ openproject_main_version }}/{{ ansible_distribution.lower() }} {{ ansible_distribution_major_version }} main
     filename: openproject
+  when: ansible_distribution == 'Debian'
+
+- name: openproject apt repo for ubuntu
+  ansible.builtin.apt_repository:
+    repo: deb https://dl.packager.io/srv/deb/opf/openproject/stable/{{ openproject_main_version }}/{{ ansible_distribution.lower() }} {{ ansible_distribution_version }} main
+    filename: openproject
+  when: ansible_distribution == 'Ubuntu'
 
 - name: install openproject
   ansible.builtin.apt:
     name: openproject
+    update_cache: true
 
 - name: set openproject package on hold
   ansible.builtin.dpkg_selections:
@@ -31,22 +41,25 @@
     mode: "0640"
     group: root
     owner: root
+  diff: "{{ openproject_show_diff | default(false) | bool }}"
   with_items:
     - "{{ openproject_filename_cert }}"
     - "{{ openproject_filename_key }}"
     - "{{ openproject_filename_ca }}"
   when:
-    - item | length > 0
     - openproject_server.ssl == 'yes'
+    - item | type_debug != 'NoneType'
+    - item | length > 0
 
 - name: deploy installer.dat
   ansible.builtin.template:
     src: installer.dat.j2
-    dest: /etc/openproject/installer.dat
+    dest: /etc/openproject/installer.dat-preconfig
     backup: true
     mode: "0640"
     owner: openproject
     group: openproject
+  diff: "{{ openproject_show_diff | default(false) | bool }}"
   notify: openproject configure
 
 - name: "openproject config:set"  # noqa no-changed-when
