@@ -47,9 +47,9 @@
     - "{{ openproject_filename_key }}"
     - "{{ openproject_filename_ca }}"
   when:
+    - openproject_server.ssl == 'yes'
     - item | type_debug != 'NoneType'
     - item | length > 0
-    - openproject_server.ssl == 'yes'
 
 - name: deploy installer.dat
   ansible.builtin.template:
