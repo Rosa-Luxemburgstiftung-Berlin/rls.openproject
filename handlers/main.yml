@@ -1,8 +1,9 @@
 ---
 
 - name: openproject configure
-  ansible.builtin.command: openproject configure -f /etc/openproject/installer.dat-preconfig
-  creates: /etc/openproject/installer.dat
+  ansible.builtin.command:
+    cmd: openproject configure -f /etc/openproject/installer.dat-preconfig
+    creates: /etc/openproject/installer.dat
   notify: openproject restart
 
 - name: openproject restart
