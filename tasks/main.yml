@@ -41,6 +41,9 @@
     mode: "0640"
     group: root
     owner: root
+  notify:
+    - openproject restart
+    - apache2 restart
   diff: "{{ openproject_show_diff | default(false) | bool }}"
   with_items:
     - "{{ openproject_filename_cert }}"
