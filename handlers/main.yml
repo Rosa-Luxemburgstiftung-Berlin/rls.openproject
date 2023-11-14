@@ -10,3 +10,8 @@
   ansible.builtin.service:
     name: openproject
     state: restarted
+
+- name: apache2 restart
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
