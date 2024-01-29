@@ -8,18 +8,18 @@
 - name: openproject apt key
   ansible.builtin.get_url:
     url: https://dl.packager.io/srv/opf/openproject/key
-    dest: /etc/apt/trusted.gpg.d/packager-io.asc
+    dest: /usr/share/keyringspackager-io.asc
     mode: "0644"
 
 - name: openproject apt repo for debian
   ansible.builtin.apt_repository:
-    repo: deb https://dl.packager.io/srv/deb/opf/openproject/stable/{{ openproject_main_version }}/{{ ansible_distribution.lower() }} {{ ansible_distribution_major_version }} main
+    repo: deb [signed-by=/usr/share/keyringspackager-io.asc] https://dl.packager.io/srv/deb/opf/openproject/stable/{{ openproject_main_version }}/{{ ansible_distribution.lower() }} {{ ansible_distribution_major_version }} main
     filename: openproject
   when: ansible_distribution == 'Debian'
 
 - name: openproject apt repo for ubuntu
   ansible.builtin.apt_repository:
-    repo: deb https://dl.packager.io/srv/deb/opf/openproject/stable/{{ openproject_main_version }}/{{ ansible_distribution.lower() }} {{ ansible_distribution_version }} main
+    repo: deb [signed-by=/usr/share/keyringspackager-io.asc] https://dl.packager.io/srv/deb/opf/openproject/stable/{{ openproject_main_version }}/{{ ansible_distribution.lower() }} {{ ansible_distribution_version }} main
     filename: openproject
   when: ansible_distribution == 'Ubuntu'
 
