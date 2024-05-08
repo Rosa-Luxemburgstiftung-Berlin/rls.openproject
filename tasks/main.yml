@@ -70,4 +70,13 @@
   notify: openproject restart
   with_items: "{{ openproject_configset }}"
 
+- name: run backup task
+  ansible.builtin.include_tasks: backup.yml
+  tags:
+    - backup
+    - openproject-backup
+  when:
+    - openproject_backup_now is defined
+    - openproject_backup_now | bool
+
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml
