@@ -43,4 +43,18 @@ openproject_configset: []
 # openproject_configset:
 #   - 'OPENPROJECT_LOG__LEVEL="debug"'
 
+# run backup task
+openproject_backup_now: false
+
+# backup command
+openproject_backup_command: openproject run backup
+
+# backup cron job
+openproject_backup_cron:
+  state: absent  # set this to present in order to configure the cron job
+  name: openprojectbackup
+  hour: 1
+  minute: 15
+  job: "{{ openproject_backup_command }}"
+
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml
