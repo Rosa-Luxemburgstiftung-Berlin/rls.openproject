@@ -1,0 +1,70 @@
+---
+- name: determine lates timestamp  # noqa key-order
+  block:
+    - name: get files from {{ openproject_recover_from_backup_dir }}
+      ansible.builtin.find:
+        paths: "{{ openproject_recover_from_backup_dir }}"
+        recurse: false
+        file_type: file
+        patterns: conf-*.tar.gz
+      register: _find_conf
+
+    - name: get latest conf file
+      ansible.builtin.set_fact:
+        openproject_recover_from_backup_timestamp: "{{ (_find_conf.files | sort(attribute='ctime') | last).path | regex_replace('.*/conf-', '') | replace('.tar.gz', '') }}"
+      when: _find_conf.matched | int > 0
+
+    - name: debug determined timestamp
+      ansible.builtin.debug:
+        var: openproject_recover_from_backup_timestamp
+        verbosity: 1
+
+  when: openproject_recover_from_backup_timestamp | default(0) | int == 0
+
+- name: assert we have a timestamp
+  ansible.builtin.assert:
+    that:
+      - openproject_recover_from_backup_timestamp | int > 0
+
+- name: find backup files
+  ansible.builtin.find:
+    paths: "{{ openproject_recover_from_backup_dir }}"
+    recurse: false
+    file_type: file
+    patterns:
+      - "*-{{ openproject_recover_from_backup_timestamp }}.tar.gz"
+      - "postgresql-dump-{{ openproject_recover_from_backup_timestamp }}.pgdump"
+  register: _find_backup_files
+
+- name: extract filenames
+  ansible.builtin.set_fact:
+    _files_to_process: "{{ _find_backup_files.files | map(attribute='path') }}"
+
+- name: debug _files_to_process
+  ansible.builtin.debug:
+    var: _files_to_process
+    verbosity: 1
+
+- name: define required files
+  ansible.builtin.set_fact:
+    _required_postgresql: "{{ [openproject_recover_from_backup_dir, 'postgresql-dump-' ~ openproject_recover_from_backup_timestamp ~ '.pgdump'] | path_join }}"
+    _required_conf: "{{ [openproject_recover_from_backup_dir, 'conf-' ~ openproject_recover_from_backup_timestamp ~ '.tar.gz'] | path_join }}"
+    _required_attachments: "{{ [openproject_recover_from_backup_dir, 'attachments-' ~ openproject_recover_from_backup_timestamp ~ '.tar.gz'] | path_join }}"
+
+- name: debug required files
+  ansible.builtin.debug:
+    var: item
+    verbosity: 1
+  with_items:
+    - "{{ _required_postgresql }}"
+    - "{{ _required_conf }}"
+    - "{{ _required_attachments }}"
+
+- name: assert important files are present
+  ansible.builtin.assert:
+    that:
+      - item in _files_to_process
+  with_items:
+    - "{{ _required_postgresql }}"
+    - "{{ _required_conf }}"
+    - "{{ _required_attachments }}"
