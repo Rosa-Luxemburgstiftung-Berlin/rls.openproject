@@ -51,6 +51,11 @@
     _required_conf: "{{ [openproject_recover_from_backup_dir, 'conf-' ~ openproject_recover_from_backup_timestamp ~ '.tar.gz'] | path_join }}"
     _required_attachments: "{{ [openproject_recover_from_backup_dir, 'attachments-' ~ openproject_recover_from_backup_timestamp ~ '.tar.gz'] | path_join }}"
 
+- name: define optioonal files
+  ansible.builtin.set_fact:
+    _optional_svn: "{{ [openproject_recover_from_backup_dir, 'svn-repositories-' ~ openproject_recover_from_backup_timestamp ~ '.tar.gz'] | path_join }}"
+    _optional_git: "{{ [openproject_recover_from_backup_dir, 'git-repositories-' ~ openproject_recover_from_backup_timestamp ~ '.tar.gz'] | path_join }}"
+
 - name: debug required files
   ansible.builtin.debug:
     var: item
@@ -60,6 +65,14 @@
     - "{{ _required_conf }}"
     - "{{ _required_attachments }}"
 
+- name: debug optional files
+  ansible.builtin.debug:
+    var: item
+    verbosity: 1
+  with_items:
+    - "{{ _optional_svn }}"
+    - "{{ _optional_git }}"
+
 - name: assert important files are present
   ansible.builtin.assert:
     that:
@@ -68,3 +81,46 @@
     - "{{ _required_postgresql }}"
     - "{{ _required_conf }}"
     - "{{ _required_attachments }}"
+
+- name: register DATABASE_URL  # noqa no-changed-when
+  ansible.builtin.command: openproject config:get DATABASE_URL
+  register: _database_url
+
+- name: debug DATABASE_URL
+  ansible.builtin.debug:
+    var: _database_url
+    verbosity: 1
+
+- name: ensure openproject service is stopped
+  ansible.builtin.service:
+    name: openproject
+    state: stopped
+
+- name: restoring config  # noqa command-instead-of-module no-changed-when
+  ansible.builtin.command:
+    cmd: "tar xzf {{ _required_conf }} -C /etc/openproject"
+
+- name: restoring attachments  # noqa command-instead-of-module no-changed-when
+  ansible.builtin.command:
+    cmd: "tar xzf {{ _required_attachments }} -C /var/db/openproject/files"
+
+- name: restoring svn repositories # noqa command-instead-of-module no-changed-when
+  ansible.builtin.command:
+    cmd: "tar xzf {{ _optional_svn }} -C /var/db/openproject/svn"
+  when: _optional_svn in _files_to_process
+
+- name: restoring git repositories # noqa command-instead-of-module no-changed-when
+  ansible.builtin.command:
+    cmd: "tar xzf {{ _optional_git }} -C /var/db/openproject/git"
+  when: _optional_git in _files_to_process
+
+# TODO remove and recreate the db using community.general.postgresql_db
+
+- name: restoring database # noqa no-changed-when
+  ansible.builtin.command:
+    cmd: "pg_restore --clean --if-exists --dbname {{ _database_url.stdout }} {{ _required_postgresql }}"
+
+- name: ensure openproject service is started
+  ansible.builtin.service:
+    name: openproject
+    state: started
