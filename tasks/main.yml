@@ -87,4 +87,21 @@
     minute: "{{ openproject_backup_cron.minute }}"
     job: "{{ openproject_backup_cron.job }}"
 
+- name: run all notified handlers
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - always
+
+- name: run recover task
+  ansible.builtin.include_tasks:
+    file: recover.yml
+    apply:
+      tags:
+        - recover
+        - openproject-recover
+        - openproject_recover_from_backup
+  when:
+    - openproject_recover_from_backup is defined
+    - openproject_recover_from_backup | bool
+
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml

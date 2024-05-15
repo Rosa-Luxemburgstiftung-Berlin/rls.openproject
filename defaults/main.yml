@@ -57,4 +57,18 @@ openproject_backup_cron:
   minute: 15
   job: "{{ openproject_backup_command }}"
 
+# recover from backup
+openproject_recover_from_backup: false
+
+# expects the files in /var/db/openproject/backup/
+openproject_recover_from_backup_dir: /var/db/openproject/backup/
+
+# set this to a defined timestamp, i.e. 20240508065009
+# if 0, we will consider the lates fond in
+# /var/db/openproject/backup/
+openproject_recover_from_backup_timestamp: 0
+
+# db restore option
+openproject_recover_from_backup_dbrestorargs: "--no-owner"
+
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml
