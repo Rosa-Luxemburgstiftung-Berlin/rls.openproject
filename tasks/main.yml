@@ -87,6 +87,11 @@
     minute: "{{ openproject_backup_cron.minute }}"
     job: "{{ openproject_backup_cron.job }}"
 
+- name: run all notified handlers
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - always
+
 - name: run recover task
   ansible.builtin.include_tasks:
     file: recover.yml
