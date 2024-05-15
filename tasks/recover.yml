@@ -100,14 +100,40 @@
   ansible.builtin.command:
     cmd: "tar xzf {{ _required_conf }} -C /etc/openproject"
 
+- name: ensure file directory exists
+  ansible.builtin.file:
+    path: /var/db/openproject/files
+    state: directory
+    owner: openproject
+    group: openproject
+    mode: '0755'
+
 - name: restoring attachments  # noqa command-instead-of-module no-changed-when
   ansible.builtin.command:
     cmd: "tar xzf {{ _required_attachments }} -C /var/db/openproject/files"
+
+- name: ensure svn directory exists
+  ansible.builtin.file:
+    path: /var/db/openproject/svn
+    state: directory
+    owner: openproject
+    group: openproject
+    mode: '0755'
+  when: _optional_svn in _files_to_process
 
 - name: restoring svn repositories # noqa command-instead-of-module no-changed-when
   ansible.builtin.command:
     cmd: "tar xzf {{ _optional_svn }} -C /var/db/openproject/svn"
   when: _optional_svn in _files_to_process
+
+- name: ensure git directory exists
+  ansible.builtin.file:
+    path: /var/db/openproject/git
+    state: directory
+    owner: openproject
+    group: openproject
+    mode: '0755'
+  when: _optional_git in _files_to_process
 
 - name: restoring git repositories # noqa command-instead-of-module no-changed-when
   ansible.builtin.command:
@@ -118,7 +144,7 @@
 
 - name: restoring database # noqa no-changed-when
   ansible.builtin.command:
-    cmd: "pg_restore --clean --if-exists --dbname {{ _database_url.stdout }} {{ _required_postgresql }}"
+    cmd: "pg_restore --clean --if-exists {{ openproject_recover_from_backup_dbrestorargs }} --dbname {{ _database_url.stdout }} {{ _required_postgresql }}"
 
 - name: ensure openproject service is started
   ansible.builtin.service:
