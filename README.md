@@ -6,6 +6,8 @@
 # rls.openproject
 ansible playbook to install [openproject](https://www.openproject.org/) on debian and ubuntu systems.
 
+it includes optional backup and recovery tasks.
+
 currently tested with different ansible versions (2.9 - 2.16) and:
  * debian 12
  * debian 11
