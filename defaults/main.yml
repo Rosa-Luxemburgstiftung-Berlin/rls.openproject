@@ -69,6 +69,13 @@ openproject_recover_from_backup_dir: /var/db/openproject/backup/
 openproject_recover_from_backup_timestamp: 0
 
 # db restore option
-openproject_recover_from_backup_dbrestorargs: "--no-owner"
+openproject_recover_from_backup_dbrestorargs: ""
+# openproject_recover_from_backup_dbrestorargs: "--no-owner"
+
+# list of cfg settings that should be preserved
+# this must be adjusted, depending on all the cfg settings where the new server differs
+openproject_recover_from_backup_persisten_cfg_settings:
+  - DATABASE_URL
+  - SERVER_HOSTNAME
 
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml

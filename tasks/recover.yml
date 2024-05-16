@@ -82,15 +82,37 @@
     - "{{ _required_conf }}"
     - "{{ _required_attachments }}"
 
-- name: register DATABASE_URL  # noqa no-changed-when
-  ansible.builtin.command: openproject config:get DATABASE_URL
-  register: _database_url
+- name: read old config VARs  # noqa no-changed-when
+  ansible.builtin.command: openproject config
+  register: _cfg
 
-- name: debug DATABASE_URL
+- name: build old config map
+  ansible.builtin.set_fact:
+    _cfgmap: "{{ _cfgmap | default({}) | combine({(item | split('='))[0]: (item | split('='))[1]}) }}"
+  with_items: "{{ _cfg.stdout_lines }}"
+
+- name: debug old config map
   ansible.builtin.debug:
-    var: _database_url
+    var: _cfgmap
     verbosity: 1
 
+- name: ensure openproject service is stopped
+  ansible.builtin.service:
+    name: openproject
+    state: stopped
+
+- name: restoring config  # noqa command-instead-of-module no-changed-when
+  ansible.builtin.command:
+    cmd: "tar xzf {{ _required_conf }} -C /etc/openproject"
+  # notify: openproject reconfigure
+
+- name: preserve cfg settings  # noqa no-changed-when
+  ansible.builtin.command:
+    cmd: "openproject config:set {{ item }}='{{ _cfgmap[item] }}'"
+  with_items: "{{ openproject_recover_from_backup_persisten_cfg_settings }}"
+  when: _cfgmap[item] | default('') | length > 0
+
+# we do NOT use values from _cfgmap, as the restore might change some stuff
 - name: register _storage_path  # noqa no-changed-when
   ansible.builtin.command: openproject config:get OPENPROJECT_ATTACHMENTS__STORAGE__PATH
   register: _storage_path
@@ -122,18 +144,9 @@
     verbosity: 1
   when: _optional_git in _files_to_process
 
-- name: ensure openproject service is stopped
-  ansible.builtin.service:
-    name: openproject
-    state: stopped
-
-- name: restoring config  # noqa command-instead-of-module no-changed-when
-  ansible.builtin.command:
-    cmd: "tar xzf {{ _required_conf }} -C /etc/openproject"
-
 - name: ensure file directory exists
   ansible.builtin.file:
-    path: "{{ _storage_path }}"
+    path: "{{ _storage_path.stdout }}"
     state: directory
     owner: openproject
     group: openproject
@@ -141,11 +154,11 @@
 
 - name: restoring attachments  # noqa command-instead-of-module no-changed-when
   ansible.builtin.command:
-    cmd: "tar xzf {{ _required_attachments }} -C {{ _storage_path }}"
+    cmd: "tar xzf {{ _required_attachments }} -C {{ _storage_path.stdout }}"
 
 - name: ensure svn directory exists
   ansible.builtin.file:
-    path: "{{ _optional_svn | default('/var/db/openproject/svn') }}"
+    path: "{{ _storage_path.stdout | default('/var/db/openproject/svn') }}"
     state: directory
     owner: openproject
     group: openproject
@@ -154,12 +167,12 @@
 
 - name: restoring svn repositories # noqa command-instead-of-module no-changed-when
   ansible.builtin.command:
-    cmd: "tar xzf {{ _optional_svn }} -C {{ _optional_svn | default('/var/db/openproject/svn') }}"
+    cmd: "tar xzf {{ _optional_svn }} -C {{ _storage_path.stdout | default('/var/db/openproject/svn') }}"
   when: _optional_svn in _files_to_process
 
 - name: ensure git directory exists
   ansible.builtin.file:
-    path: "{{ _git_repositories | default('/var/db/openproject/git') }}"
+    path: "{{ _git_repositories.stdout | default('/var/db/openproject/git') }}"
     state: directory
     owner: openproject
     group: openproject
@@ -168,13 +181,13 @@
 
 - name: restoring git repositories # noqa command-instead-of-module no-changed-when
   ansible.builtin.command:
-    cmd: "tar xzf {{ _optional_git }} -C {{ _git_repositories | default('/var/db/openproject/git') }}"
+    cmd: "tar xzf {{ _optional_git }} -C {{ _git_repositories.stdout | default('/var/db/openproject/git') }}"
   when: _optional_git in _files_to_process
 
 - name: restoring database # noqa no-changed-when
   ansible.builtin.command:
-    cmd: "pg_restore --clean --if-exists {{ openproject_recover_from_backup_dbrestorargs }} --dbname {{ _database_url.stdout }} {{ _required_postgresql }}"
-  notify: openproject reconfigure
+    cmd: "pg_restore --clean --if-exists {{ openproject_recover_from_backup_dbrestorargs }} --dbname {{ _cfgmap['DATABASE_URL'] }} {{ _required_postgresql }}"
+  # notify: openproject reconfigure
 
 - name: run all notified handlers
   ansible.builtin.meta: flush_handlers

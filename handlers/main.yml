@@ -6,10 +6,11 @@
     creates: /etc/openproject/installer.dat
   notify: openproject restart
 
-- name: openproject reconfigure  # noqa no-changed-when
-  ansible.builtin.command:
-    cmd: openproject reconfigure
-  notify: openproject restart
+#  reconfigure requires a tty
+#  - name: openproject reconfigure  # noqa no-changed-when
+#    ansible.builtin.command:
+#      cmd: openproject reconfigure
+#    notify: openproject restart
 
 - name: openproject restart
   ansible.builtin.service:
