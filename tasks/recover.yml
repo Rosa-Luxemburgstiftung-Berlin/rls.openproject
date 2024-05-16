@@ -91,6 +91,15 @@
     var: _database_url
     verbosity: 1
 
+- name: register _storage_path  # noqa no-changed-when
+  ansible.builtin.command: openproject config:get OPENPROJECT_ATTACHMENTS__STORAGE__PATH
+  register: _storage_path
+
+- name: debug _storage_path
+  ansible.builtin.debug:
+    var: _storage_path
+    verbosity: 1
+
 - name: ensure openproject service is stopped
   ansible.builtin.service:
     name: openproject
@@ -110,7 +119,7 @@
 
 - name: restoring attachments  # noqa command-instead-of-module no-changed-when
   ansible.builtin.command:
-    cmd: "tar xzf {{ _required_attachments }} -C /var/db/openproject/files"
+    cmd: "tar xzf {{ _required_attachments }} -C {{ _storage_path }}"
 
 - name: ensure svn directory exists
   ansible.builtin.file:
