@@ -25,7 +25,7 @@
 
 - name: install openproject
   ansible.builtin.apt:
-    name: openproject
+    name: "{{ openproject_package_name | default('openproject') }}"
     update_cache: true
 
 - name: set openproject package on hold

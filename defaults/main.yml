@@ -10,6 +10,10 @@ openproject_hold_package: false
 
 openproject_main_version: 13
 
+# you can set this to something like openproject=13.3.1-1709106543.9f5d5716.bookworm
+# in order to force installation of a fixed version
+openproject_package_name: openproject
+
 openproject_server:
   hostname: "{{ inventory_hostname }}"
   autoinstall: install
