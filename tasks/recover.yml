@@ -51,7 +51,7 @@
     _required_conf: "{{ [openproject_recover_from_backup_dir, 'conf-' ~ openproject_recover_from_backup_timestamp ~ '.tar.gz'] | path_join }}"
     _required_attachments: "{{ [openproject_recover_from_backup_dir, 'attachments-' ~ openproject_recover_from_backup_timestamp ~ '.tar.gz'] | path_join }}"
 
-- name: define optioonal files
+- name: define optional files
   ansible.builtin.set_fact:
     _optional_svn: "{{ [openproject_recover_from_backup_dir, 'svn-repositories-' ~ openproject_recover_from_backup_timestamp ~ '.tar.gz'] | path_join }}"
     _optional_git: "{{ [openproject_recover_from_backup_dir, 'git-repositories-' ~ openproject_recover_from_backup_timestamp ~ '.tar.gz'] | path_join }}"
@@ -86,6 +86,19 @@
   ansible.builtin.command: openproject config
   register: _cfg
 
+- name: save old config VARs to /var/tmp/openproject.config.bak
+  ansible.builtin.copy:
+    dest: /var/tmp/openproject.config.bak
+    content: "{{ _cfg.stdout }}\n"
+    mode: '0600'
+
+- name: save old installer.dat to /var/tmp/openproject.installer.dat.bak
+  ansible.builtin.copy:
+    src: /etc/openproject/installer.dat
+    dest: /var/tmp/openproject.installer.dat.bak
+    mode: preserve
+    remote_src: true
+
 - name: build old config map
   ansible.builtin.set_fact:
     _cfgmap: "{{ _cfgmap | default({}) | combine({(item | split('='))[0]: (item | split('='))[1]}) }}"
@@ -111,6 +124,24 @@
     cmd: "openproject config:set {{ item }}='{{ _cfgmap[item] }}'"
   with_items: "{{ openproject_recover_from_backup_persisten_cfg_settings }}"
   when: _cfgmap[item] | default('') | length > 0
+
+- name: save new installer.dat to /var/tmp/openproject.installer.dat.new
+  ansible.builtin.copy:
+    src: /etc/openproject/installer.dat
+    dest: /var/tmp/openproject.installer.dat.new
+    mode: preserve
+    remote_src: true
+
+- name: restore old installer.dat from /var/tmp/openproject.installer.dat.bak
+  ansible.builtin.copy:
+    src: /var/tmp/openproject.installer.dat.bak
+    dest: /etc/openproject/installer.dat
+    mode: preserve
+    remote_src: true
+# TODO: in fact we should implement a merge function here like in "preserve cfg settings"
+# reading from /var/tmp/openproject.installer.dat.new and replacing the specific settings in
+# /etc/openproject/installer.dat
+
 
 # we do NOT use values from _cfgmap, as the restore might change some stuff
 - name: register _storage_path  # noqa no-changed-when
