@@ -9,6 +9,14 @@
     - apache2
     - openproject
 
+- name: ensure backup dir exists
+  ansible.builtin.file:
+    path: /var/db/openproject/backup
+    state: directory
+    mode: '0755'
+    owner: openproject
+    group: openproject
+
 - name: run openproject backup  # noqa no-changed-when
   ansible.builtin.command: "{{ openproject_backup_command }}"
 
