@@ -32,7 +32,9 @@
   ansible.builtin.dpkg_selections:
     name: openproject
     selection: hold
-  when: openproject_hold_package | bool
+  when:
+    - openproject_hold_package is defined
+    - openproject_hold_package | bool
 
 - name: copy ssl cert files
   ansible.builtin.copy:
@@ -70,8 +72,15 @@
   notify: openproject restart
   with_items: "{{ openproject_configset }}"
 
+- name: ensure backup will be performed before upgrade
+  ansible.builtin.set_fact:
+    openproject_backup_now: true
+  when:
+    - openproject_upgrade_now is defined
+    - openproject_upgrade_now | bool
+
 - name: run backup task
-  ansible.builtin.include_tasks: backup.yml
+  ansible.builtin.include_tasks: backup_and_upgrade.yml
   tags:
     - backup
     - openproject-backup

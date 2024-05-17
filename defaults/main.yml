@@ -50,6 +50,9 @@ openproject_configset: []
 # run backup task
 openproject_backup_now: false
 
+# upgrade
+openproject_upgrade_now: false
+
 # backup command
 openproject_backup_command: openproject run backup
 
