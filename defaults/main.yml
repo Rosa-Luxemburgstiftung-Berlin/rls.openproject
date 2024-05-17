@@ -84,5 +84,13 @@ openproject_recover_from_backup_dbrestorargs: ""
 openproject_recover_from_backup_persisten_cfg_settings:
   - DATABASE_URL
   - SERVER_HOSTNAME
+# TODO: do we need to preserve SECRET_KEY_BASE and SECRET_TOKEN ?
+
+# update / insert settings into /etc/openproject/installer.dat
+openproject_recover_from_backup_update_installerdat: {}
+# example:
+# openproject_recover_from_backup_update_installerdat:
+#   'openproject/admin_email': openproject@new.domain.tld
+
 
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml
