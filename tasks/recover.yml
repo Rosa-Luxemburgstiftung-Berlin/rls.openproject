@@ -147,7 +147,7 @@
     dest: /etc/openproject/installer.dat
     regexp: '^{{ item.key }}='
     line: '{{ item.key }}={{ item.value }}'
-  with_dict: "{{ openproject_recover_from_backup_update_installerdat }}"
+  with_dict: "{{ openproject_update_installerdat }}"
 
 # we do NOT use values from _cfgmap, as the restore might change some stuff
 - name: register _storage_path  # noqa no-changed-when

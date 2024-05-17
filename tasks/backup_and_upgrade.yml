@@ -40,6 +40,21 @@
     - openproject_upgrade_now is defined
     - openproject_upgrade_now | bool
 
+- name: update installer.dat
+  ansible.builtin.lineinfile:
+    dest: /etc/openproject/installer.dat
+    regexp: '^{{ item.key }}='
+    line: '{{ item.key }}={{ item.value }}'
+  with_dict: "{{ openproject_update_installerdat }}"
+  when:
+    - openproject_upgrade_now is defined
+    - openproject_upgrade_now | bool
+
+- name: run all notified handlers
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - always
+
 - name: start services  # noqa no-changed-when
   ansible.builtin.service:
     name: "{{ item }}"
