@@ -117,7 +117,7 @@
 - name: restoring config  # noqa command-instead-of-module no-changed-when
   ansible.builtin.command:
     cmd: "tar xzf {{ _required_conf }} -C /etc/openproject"
-  # notify: openproject reconfigure
+  notify: openproject reconfigure
 
 - name: preserve cfg settings  # noqa no-changed-when
   ansible.builtin.command:
@@ -224,7 +224,7 @@
 - name: restoring database # noqa no-changed-when
   ansible.builtin.command:
     cmd: "pg_restore --clean --if-exists {{ openproject_recover_from_backup_dbrestorargs }} --dbname {{ _cfgmap['DATABASE_URL'] }} {{ _required_postgresql }}"
-  # notify: openproject reconfigure
+  notify: openproject reconfigure
 
 - name: run all notified handlers
   ansible.builtin.meta: flush_handlers
