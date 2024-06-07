@@ -59,6 +59,8 @@
   ansible.builtin.service:
     name: "{{ item }}"
     state: started
+  loop_control:
+    pause: 10
   with_items:
     - openproject
     - apache2
