@@ -120,4 +120,11 @@
     - openproject_recover_from_backup is defined
     - openproject_recover_from_backup | bool
 
+- name: enforce apache to use {{ openproject_server.hostname }}
+  ansible.builtin.template:
+    src: rewriteurl2fqdn.j2
+    dest: /etc/openproject/addons/apache2/includes/vhost/rewriteurl2fqdn.conf
+    mode: '0644'
+  notify: apache2 restart
+
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml

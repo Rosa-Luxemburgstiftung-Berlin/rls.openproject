@@ -1,0 +1,3 @@
+RewriteEngine On
+RewriteCond %{SERVER_NAME} !={{ openproject_server.hostname }}
+RewriteRule .* https://{{ openproject_server.hostname }}%{REQUEST_URI} [NE,R,L]
