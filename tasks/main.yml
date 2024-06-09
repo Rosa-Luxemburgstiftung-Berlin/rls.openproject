@@ -72,6 +72,13 @@
   notify: openproject restart
   with_items: "{{ openproject_configset }}"
 
+- name: install health check for checkmk
+  ansible.builtin.template:
+    src: checkmk_health_checks.j2
+    dest: /usr/lib/check_mk_agent/local/openproject_health_check
+    mode: '0755'
+  when: openproject_use_checkmk_check | bool
+
 - name: ensure backup will be performed before upgrade
   ansible.builtin.set_fact:
     openproject_backup_now: true
