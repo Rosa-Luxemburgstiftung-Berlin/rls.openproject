@@ -1,0 +1,22 @@
+---
+
+- name: copy automation script openprojectcreatetask.py
+  ansible.builtin.template:
+    src: openprojectcreatetask.py.j2
+    dest: /usr/local/sbin/openprojectcreatetask.py
+    mode: '0700'
+
+- name: create config files for openproject scheduled reccuring tasks
+  ansible.builtin.template:
+    src: openproject_scheduled_reccuring_config.j2
+    dest: "{{ openproject_scheduled_reccuring_confprefix }}{{ item.key }}"
+    mode: '0600'
+  with_dict: "{{ openproject_scheduled_reccuring_tasks }}"
+
+- name: create cronfile {{ openproject_scheduled_reccuring_cronfile }}
+  ansible.builtin.template:
+    src: openproject_scheduled_reccuring_cronfile.j2
+    dest: "{{ openproject_scheduled_reccuring_cronfile }}"
+    mode: '0644'
+
+...

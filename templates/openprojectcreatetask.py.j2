@@ -1,0 +1,151 @@
+#! /usr/bin/env python3
+# vim: set fileencoding=utf-8
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 smartindent ft=python
+# pylint: disable=fixme,missing-module-docstring,missing-class-docstring
+
+import sys
+import logging
+import argparse
+import json
+import datetime
+import requests
+import urllib3
+import hiyapyco
+
+OPJ_HOST = '{{ openproject_server.hostname }}'
+OPJ_URL = f'https://{OPJ_HOST}/api/v3/work_packages'
+API_TOKEN = '{{ openproject_automation_api_token }}'
+
+# can be used as format string {TODAY}
+TODAY = datetime.date.today()
+MY = datetime.date.today().strftime("%m/%Y")
+NOW = datetime.datetime.today().replace(microsecond=0)
+
+class LoggingAction(argparse.Action):
+    # pylint: disable=redefined-outer-name
+    def __call__(self, parser, namespace, values, option_string=None):
+        logger = logging.getLogger()
+        logger.setLevel(values)
+        setattr(namespace, self.dest, values)
+
+def _formatstr(fstr):
+    return fstr.format(NOW=NOW, TODAY=TODAY, MY=MY, OPJ_HOST=OPJ_HOST)
+
+logger = logging.getLogger()
+logging.basicConfig(
+    level=logging.WARN,
+    format='%(levelname)s\t[%(name)s] %(funcName)s: %(message)s'
+    )
+
+parser = argparse.ArgumentParser(
+    description='create openproject task via API',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+# TODO: since python 3.11 we can use logging.getLevelNamesMapping().keys()
+# pylint: disable=protected-access
+parser.add_argument(
+    '-l', '--loglevel',
+    help='set loglevel',
+    type=str,
+    choices=[k for k in list(logging._nameToLevel.keys()) if isinstance(k, str)],
+    action=LoggingAction
+    )
+
+parser.add_argument('-C', '--conf', action='append',
+                    help='read settings from config file(s)')
+parser.add_argument('-D', '--dump-config', action='store_true',
+                    dest='dumpconfig', default=False, help='dump settings')
+parser.add_argument('-p', '--project-id', type=int,
+                    dest='projectid', help='project id of the task')
+parser.add_argument('-g', '--assign-group-id', type=int,
+                    dest='assigngroupid', help='assign task to group id')
+parser.add_argument('-u', '--assign-user-id', type=int,
+                    dest='assignuserid', help='assign task to user id')
+parser.add_argument('-P', '--priority-id', type=int,
+                    dest='priorityid', help='priority id of the task')
+parser.add_argument('-S', '--status-id', type=int,
+                    dest='statusid', help='status id of the task')
+parser.add_argument('-t', '--type-id', type=int, default=1,
+                    dest='typeid', help='type id of the task')
+parser.add_argument('-s', '--subject', type=str, default='Test Task',
+                    help='subject / title of the task')
+parser.add_argument('-d', '--description', type=str,
+                    default='Test task created {NOW}',
+                    help='description of the task (markdown can be used)')
+
+# if you need to add the certificate to urllib:
+# https://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification
+parser.add_argument('-v', '--no-verify-ssl', dest='verify', action="store_false",
+                    default=True, help='do not verify ssl cert on connecting to zammad api')
+
+args = parser.parse_args()
+if args.conf is not None:
+    # TODO: loglevel via conffile is not working
+    parser.set_defaults(**hiyapyco.load(
+        args.conf,
+        method=hiyapyco.METHOD_MERGE,
+        interpolate=True
+        ))
+    # reload command line args
+    args = parser.parse_args()
+
+# debug args
+if logger.isEnabledFor(logging.DEBUG):
+    print(args)
+if args.dumpconfig:
+    print(args)
+    sys.exit(0)
+
+if not args.projectid:
+    logger.fatal('ERROR: missing project-id')
+    sys.exit(2)
+
+headers = {
+    'Content-Type': 'application/json'
+}
+
+# work package data
+data = {
+    'subject': _formatstr(args.subject),
+    'description': {
+        'format': 'markdown',
+        'raw': _formatstr(args.description)
+    },
+    '_links': {
+        'type': {
+            'href': f'/api/v3/types/{args.typeid}'
+        },
+        'project': {
+            'href': f'/api/v3/projects/{args.projectid}'
+        }
+    }
+}
+if args.assignuserid:
+    data['_links']['assignee'] = {'href': f'/api/v3/users/{args.assignuserid}'}
+elif args.assigngroupid:
+    data['_links']['assignee'] = {'href': f'/api/v3/groups/{args.assigngroupid}'}
+if args.priorityid:
+    data['_links']['priority'] = {'href': f'/api/v3/priorities/{args.priorityid}'}
+if args.statusid:
+    data['_links']['status'] = {'href': f'/api/v3/statuses/{args.statusid}'}
+
+response = requests.post(
+    OPJ_URL,
+    auth=('apikey', API_TOKEN),
+    headers=headers,
+    data=json.dumps(data),
+    timeout=urllib3.Timeout(connect=2.0),
+    verify=args.verify
+    )
+
+if response.status_code == 201:
+    logger.info('Work Package created successfully!')
+    logger.debug(response.json())
+    sys.exit(0)
+
+logger.fatal('Failed to create work package')
+logger.critical('Status Code: %s', response.status_code)
+logger.critical('Response: %s', response.text)
+logger.info(response.json)
+sys.exit(1)
