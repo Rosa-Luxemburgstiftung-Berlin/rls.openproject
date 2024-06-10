@@ -117,6 +117,9 @@ openproject_scheduled_reccuring_tasks: {}
 #       projectid: 10
 #       # assigngroupid: 13
 #       assignuserid: 5
+#       # priorityid: 3
+#       # statusid: 1
+#       # typeid: 1 # = Task
 openproject_scheduled_reccuring_cronfile: /etc/cron.d/openproject-scheduled-tasks
 openproject_scheduled_reccuring_confprefix: /usr/local/etc/openprojectscheduled-
 openproject_scheduled_reccuring_user: root
