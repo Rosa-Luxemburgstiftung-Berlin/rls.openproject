@@ -98,4 +98,28 @@ openproject_update_installerdat: {}
 # install the health check for ckeckmk
 openproject_use_checkmk_check: false
 
+# vault this!
+# openproject_automation_api_token: ...
+
+# scheduled task creation
+openproject_scheduled_reccuring_tasks: {}
+# example:
+# openproject_scheduled_reccuring_tasks:
+#   puddingtime:
+#     # crontab time: min hour dayofmonth month dayofweek
+#     cron: '30 14 * * * *'
+#     # check: additional check like [ "$(date '+\%u')" = "3" ]
+#     args:
+#       subject: 'Test Task @ {NOW}'
+#       description: |
+#         Test for {MY} created {TODAY}
+#         Now {NOW} it's pudding time!
+#       projectid: 10
+#       # assigngroupid: 13
+#       assignuserid: 5
+openproject_scheduled_reccuring_cronfile: /etc/cron.d/openproject-scheduled-tasks
+openproject_scheduled_reccuring_confprefix: /usr/local/etc/openprojectscheduled-
+openproject_scheduled_reccuring_user: root
+
+
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml

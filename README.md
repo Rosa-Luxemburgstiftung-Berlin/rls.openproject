@@ -13,3 +13,9 @@ currently tested with different ansible versions (2.9 - 2.16) and:
  * debian 11
  * ubuntu 22.04
  * ubuntu 20.04
+
+## scheduled task creation
+
+it includes a script and vars to configure scheduled reccuring task creation.
+
+it requires [hiyapyco](https://github.com/zerwes/hiyapyco)
