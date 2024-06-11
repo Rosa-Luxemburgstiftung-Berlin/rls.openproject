@@ -113,7 +113,9 @@ openproject_scheduled_reccuring_tasks: {}
 #       subject: 'Test Task @ {NOW}'
 #       description: |
 #         Test for {MY} created {TODAY}
-#         Now {NOW} it's pudding time!
+#         Now {NOW} it's **pudding time**!
+#         * [ ] cook pudding
+#         * [ ] eat it
 #       projectid: 10
 #       # assigngroupid: 13
 #       assignuserid: 5
