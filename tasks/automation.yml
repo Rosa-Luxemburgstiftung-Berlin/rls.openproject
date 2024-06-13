@@ -18,5 +18,6 @@
     src: openproject_scheduled_reccuring_cronfile.j2
     dest: "{{ openproject_scheduled_reccuring_cronfile }}"
     mode: '0644'
+  notify: cron reload
 
 ...
