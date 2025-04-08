@@ -102,9 +102,9 @@ openproject_use_checkmk_check: false
 # openproject_automation_api_token: ...
 
 # scheduled task creation
-openproject_scheduled_reccuring_tasks: {}
+openproject_scheduled_recurring_tasks: {}
 # example:
-# openproject_scheduled_reccuring_tasks:
+# openproject_scheduled_recurring_tasks:
 #   puddingtime:
 #     # crontab time: min hour dayofmonth month dayofweek
 #     cron: '30 14 * * * *'
@@ -122,9 +122,9 @@ openproject_scheduled_reccuring_tasks: {}
 #       # priorityid: 3
 #       # statusid: 1
 #       # typeid: 1 # = Task
-openproject_scheduled_reccuring_cronfile: /etc/cron.d/openproject-scheduled-tasks
-openproject_scheduled_reccuring_confprefix: /usr/local/etc/openprojectscheduled-
-openproject_scheduled_reccuring_user: root
+openproject_scheduled_recurring_cronfile: /etc/cron.d/openproject-scheduled-tasks
+openproject_scheduled_recurring_confprefix: /usr/local/etc/openprojectscheduled-
+openproject_scheduled_recurring_user: root
 
 
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml

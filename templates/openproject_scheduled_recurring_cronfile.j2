@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+
+MAILTO=""
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+{% for task, taskkeys in openproject_scheduled_recurring_tasks.items() %}
+
+# {{ task }}
+{{ taskkeys.cron }} {{ openproject_scheduled_recurring_user }} {{ taskkeys.check | default('test -x /usr/local/sbin/openprojectcreatetask.py') }} && /usr/local/sbin/openprojectcreatetask.py -l INFO --conf {{ openproject_scheduled_recurring_confprefix }}{{ task }} > /var/log/{{ openproject_scheduled_recurring_confprefix | basename }}{{task }} 2>&1
+
+{% endfor %}

@@ -16,6 +16,6 @@ currently tested with different ansible versions (2.9 - 2.16) and:
 
 ## scheduled task creation
 
-it includes a script and vars to configure scheduled reccuring task creation.
+it includes a script and vars to configure scheduled recurring task creation.
 
 it requires [hiyapyco](https://github.com/zerwes/hiyapyco)
