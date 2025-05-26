@@ -10,7 +10,7 @@
     url: https://dl.packager.io/srv/opf/openproject/key
     dest: /usr/share/keyringspackager-io.asc
     mode: "0644"
-  retries: 3  # for molecule test / github action
+  retries: "{{ lookup('env', 'MOLECULE_FILE') | ternary(5, 1) }}"  # for molecule test / github action
   delay: 5
 
 - name: openproject apt repo for debian
