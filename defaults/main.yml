@@ -9,7 +9,7 @@ openproject_required_packages:
 openproject_hold_package: false
 
 # main version
-openproject_main_version: 15
+openproject_main_version: 16
 
 # you can set this to something like openproject=13.3.1-1709106543.9f5d5716.bookworm
 # in order to force installation of a fixed version
