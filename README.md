@@ -8,11 +8,13 @@ ansible playbook to install [openproject](https://www.openproject.org/) on debia
 
 it includes optional backup and recovery tasks.
 
-currently tested with different ansible versions (2.9 - 2.16) and:
+currently tested with different ansible versions (2.9 - 2.18¹) and:
  * debian 12
  * debian 11
  * ubuntu 22.04
  * ubuntu 20.04
+
+¹) - the tests usually include a run with the latest stabel version
 
 ## scheduled task creation
 
