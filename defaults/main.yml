@@ -8,7 +8,13 @@ openproject_required_packages:
 
 openproject_hold_package: false
 
-openproject_main_version: 13
+# main version
+openproject_main_version: 15
+
+# you can set this to something like openproject=13.3.1-1709106543.9f5d5716.bookworm
+# in order to force installation of a fixed version
+# ! must be available in openproject_main_version
+openproject_package_name: openproject
 
 openproject_server:
   hostname: "{{ inventory_hostname }}"
@@ -46,6 +52,9 @@ openproject_configset: []
 # run backup task
 openproject_backup_now: false
 
+# upgrade
+openproject_upgrade_now: false
+
 # backup command
 openproject_backup_command: openproject run backup
 
@@ -56,5 +65,66 @@ openproject_backup_cron:
   hour: 1
   minute: 15
   job: "{{ openproject_backup_command }}"
+
+# recover from backup
+openproject_recover_from_backup: false
+
+# expects the files in /var/db/openproject/backup/
+openproject_recover_from_backup_dir: /var/db/openproject/backup/
+
+# set this to a defined timestamp, i.e. 20240508065009
+# if 0, we will consider the lates fond in
+# /var/db/openproject/backup/
+openproject_recover_from_backup_timestamp: 0
+
+# db restore option
+openproject_recover_from_backup_dbrestorargs: ""
+# openproject_recover_from_backup_dbrestorargs: "--no-owner"
+
+# list of cfg settings that should be preserved
+# this must be adjusted, depending on all the cfg settings where the new server differs
+openproject_recover_from_backup_persisten_cfg_settings:
+  - DATABASE_URL
+  - SERVER_HOSTNAME
+# TODO: do we need to preserve SECRET_KEY_BASE and SECRET_TOKEN ?
+
+# update / insert settings into /etc/openproject/installer.dat
+# will be run after recover and update
+openproject_update_installerdat: {}
+# example:
+# openproject_update_installerdat:
+#   'openproject/admin_email': openproject@new.domain.tld
+
+# install the health check for ckeckmk
+openproject_use_checkmk_check: false
+
+# vault this!
+# openproject_automation_api_token: ...
+
+# scheduled task creation
+openproject_scheduled_recurring_tasks: {}
+# example:
+# openproject_scheduled_recurring_tasks:
+#   puddingtime:
+#     # crontab time: min hour dayofmonth month dayofweek
+#     cron: '30 14 * * * *'
+#     # check: additional check like [ "$(date '+\%u')" = "3" ]
+#     args:
+#       subject: 'Test Task @ {NOW}'
+#       description: |
+#         Test for {MY} created {TODAY}
+#         Now {NOW} it's **pudding time**!
+#         * [ ] cook pudding
+#         * [ ] eat it
+#       projectid: 10
+#       # assigngroupid: 13
+#       assignuserid: 5
+#       # priorityid: 3
+#       # statusid: 1
+#       # typeid: 1 # = Task
+openproject_scheduled_recurring_cronfile: /etc/cron.d/openproject-scheduled-tasks
+openproject_scheduled_recurring_confprefix: /usr/local/etc/openprojectscheduled-
+openproject_scheduled_recurring_user: root
+
 
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml

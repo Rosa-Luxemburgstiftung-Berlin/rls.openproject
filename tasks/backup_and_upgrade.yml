@@ -1,0 +1,66 @@
+---
+
+- name: stop services  # noqa no-changed-when
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: stopped
+  failed_when: false
+  with_items:
+    - apache2
+    - openproject
+
+- name: ensure backup dir exists
+  ansible.builtin.file:
+    path: /var/db/openproject/backup
+    state: directory
+    mode: '0755'
+    owner: openproject
+    group: openproject
+
+- name: run openproject backup  # noqa no-changed-when
+  ansible.builtin.command: "{{ openproject_backup_command }}"
+
+- name: upgrade openproject  # noqa package-latest
+  ansible.builtin.apt:
+    name: openproject
+    state: latest
+    allow_change_held_packages: true
+  notify: openproject reconfigure
+  when:
+    - openproject_upgrade_now is defined
+    - openproject_upgrade_now | bool
+
+- name: set openproject package on hold
+  ansible.builtin.dpkg_selections:
+    name: openproject
+    selection: hold
+  when:
+    - openproject_hold_package is defined
+    - openproject_hold_package | bool
+    - openproject_upgrade_now is defined
+    - openproject_upgrade_now | bool
+
+- name: update installer.dat
+  ansible.builtin.lineinfile:
+    dest: /etc/openproject/installer.dat
+    regexp: '^{{ item.key }}='
+    line: '{{ item.key }}={{ item.value }}'
+  with_dict: "{{ openproject_update_installerdat }}"
+  when:
+    - openproject_upgrade_now is defined
+    - openproject_upgrade_now | bool
+
+- name: run all notified handlers
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - always
+
+- name: start services  # noqa no-changed-when
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+  loop_control:
+    pause: 10
+  with_items:
+    - openproject
+    - apache2

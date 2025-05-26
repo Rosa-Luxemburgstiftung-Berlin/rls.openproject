@@ -27,14 +27,16 @@
 
 - name: install openproject
   ansible.builtin.apt:
-    name: openproject
+    name: "{{ openproject_package_name | default('openproject') }}"
     update_cache: true
 
 - name: set openproject package on hold
   ansible.builtin.dpkg_selections:
     name: openproject
     selection: hold
-  when: openproject_hold_package | bool
+  when:
+    - openproject_hold_package is defined
+    - openproject_hold_package | bool
 
 - name: copy ssl cert files
   ansible.builtin.copy:
@@ -72,8 +74,22 @@
   notify: openproject restart
   with_items: "{{ openproject_configset }}"
 
+- name: install health check for checkmk
+  ansible.builtin.template:
+    src: checkmk_health_checks.j2
+    dest: /usr/lib/check_mk_agent/local/openproject_health_check
+    mode: '0755'
+  when: openproject_use_checkmk_check | bool
+
+- name: ensure backup will be performed before upgrade
+  ansible.builtin.set_fact:
+    openproject_backup_now: true
+  when:
+    - openproject_upgrade_now is defined
+    - openproject_upgrade_now | bool
+
 - name: run backup task
-  ansible.builtin.include_tasks: backup.yml
+  ansible.builtin.include_tasks: backup_and_upgrade.yml
   tags:
     - backup
     - openproject-backup
@@ -88,5 +104,41 @@
     hour: "{{ openproject_backup_cron.hour }}"
     minute: "{{ openproject_backup_cron.minute }}"
     job: "{{ openproject_backup_cron.job }}"
+
+- name: run all notified handlers
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - always
+
+- name: run recover task
+  ansible.builtin.include_tasks:
+    file: recover.yml
+    apply:
+      tags:
+        - recover
+        - openproject-recover
+        - openproject_recover_from_backup
+  when:
+    - openproject_recover_from_backup is defined
+    - openproject_recover_from_backup | bool
+
+- name: enforce apache to use {{ openproject_server.hostname }}
+  ansible.builtin.template:
+    src: rewriteurl2fqdn.j2
+    dest: /etc/openproject/addons/apache2/includes/vhost/rewriteurl2fqdn.conf
+    mode: '0644'
+  notify: apache2 restart
+
+- name: include automation tasks
+  tags:
+    - always
+  ansible.builtin.include_tasks:
+    file: automation.yml
+    apply:
+      tags:
+        - automation
+  when:
+    - openproject_automation_api_token is defined
+    - openproject_scheduled_recurring_tasks
 
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml

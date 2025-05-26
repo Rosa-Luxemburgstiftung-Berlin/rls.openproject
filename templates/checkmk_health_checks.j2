@@ -1,0 +1,12 @@
+#! /bin/bash
+
+declare -r OPJ_HOST="{{ ansible_fqdn }}"
+
+curl -s  -w "\n" https://${OPJ_HOST}/health_checks/all 2>&1 | sed '1d' | while read checkline; do
+	CHECKNAME=${checkline%%: *}
+	STATUSTXT=${checkline#*: }
+	STATUS=${STATUSTXT%% *}
+	ECODE=0
+	[ "$STATUS" != "PASSED" ] && ECODE=1
+	echo "$ECODE health_check_$CHECKNAME - $STATUSTXT"
+done
