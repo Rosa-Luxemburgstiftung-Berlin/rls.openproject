@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      # max-parallel: 3
+      max-parallel: 4
       matrix:
         ansible:
           - latest ansible
@@ -25,7 +25,7 @@ jobs:
           - ubuntu2004
         include:
           - ansible: latest ansible
-            pip3deps: 'ansible molecule "molecule-plugins[docker]" yamllint ansible-lint'
+            pip3deps: 'ansible molecule "molecule-plugins[docker]" yamllint ansible-lint requests==2.31.0'
           - ansible: pinned ansible
             pip3deps: '"ansible==8.6.0" "molecule-plugins[docker]" "yamllint==1.32.0" "ansible-lint==6.22.0"'
           - ansible: legacy ansible
