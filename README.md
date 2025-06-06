@@ -16,6 +16,7 @@ currently tested with different ansible versions (2.9 - 2.18¹ + 2.19pre²) and:
  * ubuntu 20.04
 
 ¹) - the tests usually include a run with the latest stabel version
+
 ²) - this role is ready to run using ansible 12 / ansible-core 2.19
 
 ## scheduled task creation
