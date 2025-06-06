@@ -126,5 +126,4 @@ openproject_scheduled_recurring_cronfile: /etc/cron.d/openproject-scheduled-task
 openproject_scheduled_recurring_confprefix: /usr/local/etc/openprojectscheduled-
 openproject_scheduled_recurring_user: root
 
-
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml
