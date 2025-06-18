@@ -6,17 +6,17 @@
     dest: /usr/local/sbin/openprojectcreatetask.py
     mode: '0700'
 
-- name: create config files for openproject scheduled reccuring tasks
+- name: create config files for openproject scheduled recurring tasks
   ansible.builtin.template:
-    src: openproject_scheduled_reccuring_config.j2
-    dest: "{{ openproject_scheduled_reccuring_confprefix }}{{ item.key }}"
+    src: openproject_scheduled_recurring_config.j2
+    dest: "{{ openproject_scheduled_recurring_confprefix }}{{ item.key }}"
     mode: '0600'
-  with_dict: "{{ openproject_scheduled_reccuring_tasks }}"
+  with_dict: "{{ openproject_scheduled_recurring_tasks }}"
 
-- name: create cronfile {{ openproject_scheduled_reccuring_cronfile }}
+- name: create cronfile {{ openproject_scheduled_recurring_cronfile }}
   ansible.builtin.template:
-    src: openproject_scheduled_reccuring_cronfile.j2
-    dest: "{{ openproject_scheduled_reccuring_cronfile }}"
+    src: openproject_scheduled_recurring_cronfile.j2
+    dest: "{{ openproject_scheduled_recurring_cronfile }}"
     mode: '0644'
   notify: cron reload
 
