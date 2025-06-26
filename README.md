@@ -22,3 +22,11 @@ currently tested with different ansible versions (2.9 - 2.18¹ + 2.19pre²) and:
 ## scheduled task creation
 
 it includes a script and vars to configure scheduled recurring task creation (requires [hiyapyco](https://github.com/zerwes/hiyapyco))
+
+## Migrating your OpenProject installation to PostgreSQL 17
+
+Since OpenProject 16, at least PostgreSQL 16 is required.
+
+The playbook includes a task that will migrate your running OpenProject installationa from PostgreSQL 13 to 17.
+
+Run: `ansible-playbook -e openproject_pgsql13to17=true -t pgsql13to17 ...`

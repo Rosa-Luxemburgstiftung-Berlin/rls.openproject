@@ -1,0 +1,99 @@
+---
+# migrate a existing instance to postgresql 17
+# see https://www.openproject.org/docs/installation-and-operations/misc/migration-to-postgresql17/
+
+- name: gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: assert postgresql-13 is installed
+  ansible.builtin.assert:
+    that: ansible_facts.packages['postgresql-13'] is defined
+
+- name: assert postgresql-17 is not installed
+  ansible.builtin.assert:
+    that: ansible_facts.packages['postgresql-17'] is not defined
+
+- name: install postgresql-17
+  ansible.builtin.apt:
+    name: postgresql-17
+
+- name: create pgcluster with version 17
+  ansible.builtin.command:
+    cmd: pg_createcluster 17 main --start
+    creates: /var/lib/postgresql/17/main/PG_VERSION
+
+- name: stop openproject
+  ansible.builtin.service:
+    name: openproject
+    state: stopped
+
+- name: stop postgresql server instances ...  # noqa no-changed-when
+  ansible.builtin.command: /usr/lib/postgresql/{{ item }}/bin/pg_ctl stop --wait --pgdata=/var/lib/postgresql/{{ item }}/main
+  become: true
+  become_user: postgres
+  with_items:
+    - 13
+    - 17
+
+- name: migrate postgresql data ...  # noqa no-changed-when
+  ansible.builtin.command:
+    argv:
+      - /usr/lib/postgresql/17/bin/pg_upgrade
+      - --old-bindir=/usr/lib/postgresql/13/bin
+      - --new-bindir=/usr/lib/postgresql/17/bin
+      - --old-datadir=/var/lib/postgresql/13/main
+      - --new-datadir=/var/lib/postgresql/17/main
+      - --old-options
+      - -c config_file=/etc/postgresql/13/main/postgresql.conf
+      - --new-options
+      - -c config_file=/etc/postgresql/17/main/postgresql.conf
+  become: true
+  become_user: postgres
+
+- name: copy postgresql conf files from 13 to 17 ...
+  ansible.builtin.copy:
+    src: /etc/postgresql/13/main/{{ item }}
+    dest: /etc/postgresql/17/main/{{ item }}
+    backup: true
+    remote_src: true
+    mode: preserve
+    owner: postgres
+    group: postgres
+  with_items:
+    - conf.d/custom.conf
+    - pg_hba.conf
+
+- name: change port for postgresql 13
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/13/main/conf.d/custom.conf
+    line: 'port = 45433'
+    regexp: '^port *= *[0-9]*$'
+
+- name: start postgresql 17 ...  # noqa no-changed-when
+  ansible.builtin.command:
+    argv:
+      - /usr/lib/postgresql/17/bin/pg_ctl
+      - start
+      - --wait
+      - --pgdata=/var/lib/postgresql/17/main
+      - -o
+      - -c config_file=/etc/postgresql/17/main/postgresql.conf
+  become: true
+  become_user: postgres
+
+- name: start openproject
+  ansible.builtin.service:
+    name: openproject
+    state: started
+
+- name: remove pgcluster with version 13
+  ansible.builtin.command:
+    cmd: pg_dropcluster 13 main
+    removes: /var/lib/postgresql/13/main/PG_VERSION
+
+- name: purge postgresql-13
+  ansible.builtin.apt:
+    name: postgresql-13
+    state: absent
+    purge: true
