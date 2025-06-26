@@ -141,4 +141,16 @@
     - openproject_automation_api_token is defined
     - openproject_scheduled_recurring_tasks | length > 1
 
+- name: perform migration of PostgreSQL 13 to 17
+  tags:
+    - always
+  ansible.builtin.include_tasks:
+    file: pgsql13to17.yml
+    apply:
+      tags:
+        - pgsql13to17
+  when:
+    - openproject_pgsql13to17 | default(false) | bool
+    - openproject_postgres.autoinstall == 'install'
+
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml
