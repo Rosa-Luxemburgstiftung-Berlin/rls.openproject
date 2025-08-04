@@ -22,7 +22,7 @@ jobs:
           - debian12
           - debian11
           - ubuntu2204
-          - ubuntu2004
+          # task #32 # - ubuntu2004
         include:
           - ansible: latest ansible
             pip3deps: 'ansible molecule "molecule-plugins[docker]" yamllint ansible-lint requests==2.31.0'
@@ -39,9 +39,9 @@ jobs:
           - distro: ubuntu2204
             did: ubuntu
             codename: jammy
-          - distro: ubuntu2004
-            did: ubuntu
-            codename: focal
+          # task #32 # - distro: ubuntu2004
+          #  did: ubuntu
+          #  codename: focal
     steps:
       - uses: actions/checkout@v4
         with:
