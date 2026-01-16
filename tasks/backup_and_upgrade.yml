@@ -20,10 +20,10 @@
 - name: run openproject backup  # noqa no-changed-when
   ansible.builtin.command: "{{ openproject_backup_command }}"
 
-- name: upgrade openproject  # noqa package-latest
+- name: upgrade openproject to {{ openproject_upgrade_version }}  # noqa package-latest
   ansible.builtin.apt:
     name: openproject
-    state: latest
+    state: "{{ openproject_upgrade_version }}"
     allow_change_held_packages: true
   notify: openproject reconfigure
   when:
