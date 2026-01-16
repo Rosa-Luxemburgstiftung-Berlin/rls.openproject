@@ -52,8 +52,11 @@ openproject_configset: []
 # run backup task
 openproject_backup_now: false
 
-# upgrade
+# run upgrade task
 openproject_upgrade_now: false
+# version to install on backup task
+# set this to a desired version if you do not like to install the lates version
+# openproject_upgrade_version: 16.6.4-1767877238.e7fc1efe.bookworm
 
 # backup command
 openproject_backup_command: openproject run backup
