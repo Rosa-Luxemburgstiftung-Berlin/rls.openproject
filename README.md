@@ -3,6 +3,8 @@
 [![molecule test](https://github.com/Rosa-Luxemburgstiftung-Berlin/rls.openproject/actions/workflows/molecule.yml/badge.svg)](https://github.com/Rosa-Luxemburgstiftung-Berlin/rls.openproject/actions/workflows/molecule.yml)
 ![Ansible 12 ready](https://img.shields.io/badge/ansible_12-ready-green?logo=ansible&labelColor=black)
 
+> [!IMPORTANT]
+> As openproject stopped building new debian packages, this project has been archived
 
 # rls.openproject
 ansible playbook to install [openproject](https://www.openproject.org/) on debian and ubuntu systems.
